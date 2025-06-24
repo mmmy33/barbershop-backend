@@ -20,7 +20,7 @@ def get_barber_available_timeslots(
         target_date: date = Query(..., description="Date for which to get available timeslots (YYYY-MM-DD)."),
         service_id: int = Query(..., description="ID of the service to book (determines duration)."),
         slot_interval_minutes: int = Query(
-            15, ge=5, le=60, description="Granularity of slots in minutes (e.g., 15, 30)."),
+            50, ge=1, description="Granularity of slots in minutes (e.g., 15, 30)."),
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
