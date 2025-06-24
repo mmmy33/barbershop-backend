@@ -111,7 +111,7 @@ def remove_addon(
 
 
 # Endpoints for Barber Schedules
-@router.post("/{barber_id/schedules/", response_model=BarberScheduleInDB, status_code=status.HTTP_201_CREATED)
+@router.post("/{barber_id}/schedules/", response_model=BarberScheduleInDB, status_code=status.HTTP_201_CREATED)
 def create_schedule_for_barber(
         barber_id: int,
         schedule_data: BarberScheduleCreate,
@@ -130,7 +130,7 @@ def create_schedule_for_barber(
     return create_barber_schedule(db=db, barber_id=barber_id, schedule_data=schedule_data)
 
 
-@router.get("/{barber_id/schedules/", response_model=List[BarberScheduleInDB])
+@router.get("/{barber_id}/schedules/", response_model=List[BarberScheduleInDB])
 def get_schedules_for_barber(
         barber_id: int,
         db: Session = Depends(get_db),

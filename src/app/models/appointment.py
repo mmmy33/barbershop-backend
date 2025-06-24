@@ -7,6 +7,8 @@ from sqlalchemy.types import DateTime
 from src.app.database import Base
 from src.app.models.appointment_addon_link import appointment_addon
 
+from src.app.models.user import User
+
 
 class Appointment(Base):
     __tablename__ = "appointments"

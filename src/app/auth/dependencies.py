@@ -27,6 +27,7 @@ def get_current_user(
         db: Session = Depends(get_db)
 ) -> User:
     token = credentials.credentials
+
     logger.info("✅ get_current_user() called")
     logger.info(f"Decoding token...")
     credentials_exception = HTTPException(

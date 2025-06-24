@@ -35,44 +35,46 @@ app.include_router(addons.router, prefix="/api/addons", tags=["Addons"])
 app.include_router(timeslots.router, prefix="/api/timeslots", tags=["Timeslots"])
 
 
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
+# def custom_openapi():
+#     if app.openapi_schema:
+#         return app.openapi_schema
+#
+#     openapi_schema = get_openapi(
+#         title="Barbershop API",
+#         version="1.0.0",
+#         description="API for Barbershop",
+#         routes=app.routes,
+#     )
+#
+#     openapi_schema["components"]["securitySchemes"] = {
+#         "BearerAuth": {
+#             "type": "http",
+#             "scheme": "bearer",
+#             "bearerFormat": "JWT",
+#         }
+#     }
+#     public_paths = {
+#         "/": ["get"],
+#         "/api/auth/login": ["post"],
+#         "/api/auth/register": ["post"],
+#     }
+#
+#     for path, path_item in openapi_schema["paths"].items():
+#         for method, method_item in path_item.items():
+#             if method in public_paths.get(path, []):
+#                 method_item["security"] = []
+#             else:
+#                 method_item.setdefault("security", [{"BearerAuth": []}])
+#
+#     app.openapi_schema = openapi_schema
+#     return app.openapi_schema
+#
+#
+# app.openapi = custom_openapi
 
-    openapi_schema = get_openapi(
-        title="Barbershop API",
-        version="1.0.0",
-        description="API for Barbershop",
-        routes=app.routes,
-    )
-
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-        }
-    }
-    public_paths = {
-        "/": ["get"],
-        "/api/auth/login": ["post"],
-        "/api/auth/register": ["post"],
-    }
-
-    for path, path_item in openapi_schema["paths"].items():
-        for method, method_item in path_item.items():
-            if method in public_paths.get(path, []):
-                method_item["security"] = []
-            else:
-                method_item.setdefault("security", [{"BearerAuth": []}])
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
-
-
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 @app.get("/")
 def root():
     return {"message": "Barbershop backend is working"}

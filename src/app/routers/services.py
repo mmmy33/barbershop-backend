@@ -21,7 +21,7 @@ def create_service(
 
 
 @router.get("/", response_model=List[ServiceRead])
-def get_all_services(db: Session = Depends(get_db), current_user: User = Depends(admin_required)):
+def get_all_services(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return crud.get_services(db=db)
 
 
