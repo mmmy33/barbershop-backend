@@ -41,6 +41,7 @@ def get_available_timeslots(
         slot_interval_minutes: int = 50,
         addon_ids: List[int] = None
 ) -> List[datetime]:
+
     if slot_interval_minutes <= 0:
         raise ValueError("slot_interval_minutes must be a positive integer and a divisor of 60.")
 
@@ -141,23 +142,39 @@ def get_available_timeslots(
 
     while current_slot_start + total_duration <= working_end_datetime_utc:
         # print(current_slot_start)
+
         potential_slot_end = current_slot_start + total_duration
         is_available = True
+
+        # if not(merged_booked_intervals and available_slots ):
+        #     check_interval = timedelta(0) if current_slot_start - timedelta(
+        #         minutes=slot_interval_minutes) <= working_start_datetime_utc else timedelta(minutes=slot_interval_minutes)
+        #     # check_interval = timedelta(0) if current_slot_start - timedelta(minutes=slot_interval_minutes) <= working_start_datetime_utc else timedelta(minutes=slot_interval_minutes)
+        #     print("check_interval", check_interval)
+        #     print("working_start_datetime_utc", working_start_datetime_utc )
+        #     available_slots.append(current_slot_start - check_interval)
+        #     current_slot_start +=  timedelta(minutes=slot_interval_minutes)
+        #     continue
 
         for booked in merged_booked_intervals:
             # print("=====", booked["start"], potential_slot_end, booked["end"])
             if not (potential_slot_end <= booked["start"] or current_slot_start >= booked["end"]):
                 is_available = False
                 current_slot_start = booked["end"] + timedelta(minutes=slot_interval_minutes)
-                print("===" * 30, booked["start"], booked["end"])
+                # print("===" * 30, booked["start"], booked["end"])
                 break
 
-        if is_available:
-            print("hello")
-            available_slots.append(current_slot_start)
-            # print(current_slot_start, "total_duration", total_duration, "potential_slot_end", potential_slot_end)
-            current_slot_start +=  total_duration + timedelta(minutes=slot_interval_minutes)
 
+        if is_available:
+
+            # available_slots.append(potential_slot_end - timedelta(minutes=slot_interval_minutes))
+            available_slots.append(current_slot_start)
+
+            # available_slots.append(current_slot_start + timedelta(minutes=slot_interval_minutes))
+
+            # print(current_slot_start, "total_duration", total_duration, "potential_slot_end", potential_slot_end)
+            current_slot_start +=  timedelta(minutes=slot_interval_minutes)
+    available_slots.sort()
     return available_slots
 
 
