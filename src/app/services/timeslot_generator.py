@@ -161,6 +161,7 @@ def get_available_timeslots(
             if not (potential_slot_end <= booked["start"] or current_slot_start >= booked["end"]):
                 is_available = False
                 current_slot_start = booked["end"] + timedelta(minutes=slot_interval_minutes)
+                available_slots.append(booked["end"])
                 # print("===" * 30, booked["start"], booked["end"])
                 break
 
