@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, DateTime
 from src.app.database import Base
 
+from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -12,5 +13,9 @@ class User(Base):
     phone_number: Mapped[str] = mapped_column(unique=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(default="user")
+
+    is_verified: Mapped[bool] = mapped_column(default=False)
+    verification_code: Mapped[str] = mapped_column(String(6), nullable=True)
+    verification_code_expires: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     appointments: Mapped[list["Appointment"]] = relationship("Appointment", back_populates="user")
