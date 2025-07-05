@@ -2,7 +2,7 @@ from datetime import datetime, date, timedelta, timezone
 from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from src.app.models.addon import Addon
@@ -180,5 +180,63 @@ def get_available_timeslots(
 
 
 
+def check_availability(
+    db: Session,
+    barber_id: int,
+    scheduled_time: datetime,  # must be UTC
+    service_id: int,
+    addon_ids: List[int] = None
+):
+    if addon_ids is None:
+        addon_ids = []
 
 
+    duration = calculate_total_duration(db, service_id, addon_ids)
+
+
+    requested_start = (
+        scheduled_time.astimezone(timezone.utc)
+        if scheduled_time.tzinfo
+        else scheduled_time.replace(tzinfo=timezone.utc)
+    )
+    requested_end = requested_start + duration
+
+
+    day_of_week = scheduled_time.weekday()
+    schedule_entry = db.scalars(
+        select(BarberSchedule)
+        .where(BarberSchedule.barber_id == barber_id)
+        .where(BarberSchedule.day_of_week == day_of_week)
+    ).first()
+
+    if not schedule_entry:
+        raise HTTPException(status_code=400, detail="The barber is not working on this day.")
+
+    working_start_dt = datetime.combine(scheduled_time.date(), schedule_entry.start_time, tzinfo=timezone.utc)
+    working_end_dt = datetime.combine(scheduled_time.date(), schedule_entry.end_time, tzinfo=timezone.utc)
+
+
+    if not (working_start_dt <= requested_start and requested_end <= working_end_dt):
+        raise HTTPException(status_code=400, detail="The requested time is outside the working hours.")
+
+
+    existing_appointments = db.scalars(
+        select(Appointment)
+        .where(Appointment.barber_id == barber_id)
+        .where(func.date(Appointment.scheduled_time) == scheduled_time.date())
+    ).all()
+
+    for appt in existing_appointments:
+        appt_start = (
+            appt.scheduled_time.astimezone(timezone.utc)
+            if appt.scheduled_time.tzinfo
+            else appt.scheduled_time.replace(tzinfo=timezone.utc)
+        )
+        appt_end = appt_start + timedelta(minutes=appt.total_duration)
+
+
+        if not (requested_end <= appt_start or requested_start >= appt_end):
+            raise HTTPException(status_code=400, detail="The time slot is already booked.")
+
+
+    return True

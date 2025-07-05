@@ -16,6 +16,7 @@ from src.app.models.service import Service
 from src.app.models.user import User
 from src.app.schemas.appointment import AppointmentCreate, AppointmentReadDetailed, AppointmentResponse, \
     AppointmentGroupedUserView, AppointmentShortUserView, AddonsOut
+from src.app.services.timeslot_generator import check_availability
 
 router = APIRouter()
 
@@ -26,6 +27,11 @@ def create_appointment(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    check_availability(
+        db=db,
+        barber_id=appointment.barber_id,
+        scheduled_time=appointment.scheduled_time,
+        service_id=appointment.service_id)  # check_availability
     created_appointment = create_appointment_crud(db=db, data=appointment, user_id=current_user.id)
 
     return created_appointment

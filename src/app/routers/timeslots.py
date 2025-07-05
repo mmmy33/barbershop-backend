@@ -9,7 +9,7 @@ from src.app.database import get_db
 from src.app.models.barber import Barber
 from src.app.models.service import Service
 from src.app.models.user import User
-from src.app.services.timeslot_generator import get_available_timeslots
+from src.app.services.timeslot_generator import get_available_timeslots, check_availability
 
 router = APIRouter()
 
@@ -38,6 +38,7 @@ def get_barber_available_timeslots(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Service not found.")
 
     try:
+        # check_availability(db=db, barber_id=barber_id, scheduled_time=datetime.combine(target_date, datetime.min.time()), service_id=service_id)
         available_slots = get_available_timeslots(
             db=db,
             barber_id=barber_id,
