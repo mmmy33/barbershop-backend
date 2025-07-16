@@ -1,8 +1,10 @@
 services:
   db:
-    image: postgres:15
+#    image: postgres:15
+#    image: postgres:16.9-alpine3.22
+    image: postgres:13-alpine
     container_name: barbershopp-db
-    restart: always
+#    restart: always
     environment:
       POSTGRES_DB: barbershop
       POSTGRES_USER: postgres

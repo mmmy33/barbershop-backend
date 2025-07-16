@@ -65,7 +65,7 @@ def assign_services(
         db: Session = Depends(get_db),
         current_user: User = Depends(admin_required)
 ):
-    result = crud.assign_services_to_barber(db, barber_id, payload.service_ids)
+    result = crud.assign_services_to_barber(db, barber_id, payload.services)
     if not result:
         raise HTTPException(status_code=404, detail="Barber not found or invalid service IDs")
     return result

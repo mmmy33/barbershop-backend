@@ -19,6 +19,13 @@ def create_appointment(db: Session, data: AppointmentCreate, user_id: int) -> Ap
     if not barber:
         raise HTTPException(status_code=400, detail="Barber not found")
 
+    barber_service = next(
+        (bs for bs in barber.barber_services if bs.service_id == service.id),
+        None
+    )
+    if not barber_service:
+        raise HTTPException(status_code=400, detail="This barber does not provide the selected service")
+
     addons = []
     if data.addon_ids:
         addons = db.query(Addon).filter(Addon.id.in_(data.addon_ids)).all()
@@ -26,7 +33,7 @@ def create_appointment(db: Session, data: AppointmentCreate, user_id: int) -> Ap
             raise HTTPException(status_code=400, detail="Some addon IDs not found")
 
     total_price = service.price + sum(addon.price for addon in addons)
-    total_duration = service.duration + sum(addon.duration for addon in addons)
+    total_duration = barber_service.duration + sum(addon.duration for addon in addons)
     appointment_model = Appointment(
         name=data.name,
         phone_number=data.phone_number,

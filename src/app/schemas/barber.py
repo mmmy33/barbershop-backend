@@ -18,8 +18,12 @@ class BarberRead(BarberBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ServiceAssignment(BaseModel):
+    service_id: int
+    duration: int  # тривалість у хвилинах
+
 class AssignServices(BaseModel):
-    service_ids: List[int]
+    services: List[ServiceAssignment]
 
 
 class AssignAddons(BaseModel):

@@ -33,7 +33,7 @@ class ServiceUpdate(BaseModel):
 class ServiceOut(BaseModel):
     id: int
     name: str
-    duration: int
+    # duration: int
     price: int
 
     model_config = ConfigDict(from_attributes=True)

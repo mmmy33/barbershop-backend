@@ -7,9 +7,10 @@ from sqlalchemy.orm import Session
 from src.app.models.addon import Addon
 from src.app.models.barber import Barber
 from src.app.models.barber_schedule import BarberSchedule
+from src.app.models.barber_service_link import BarberService
 from src.app.models.barber_unavailable_time import BarberUnavailableTime
 from src.app.models.service import Service
-from src.app.schemas.barber import BarberCreate, BarberBase, BarberUpdate
+from src.app.schemas.barber import BarberCreate, BarberBase, BarberUpdate, ServiceAssignment
 from src.app.schemas.barber_schedule import BarberScheduleCreate, BarberScheduleUpdate, BarberUnavailableTimeCreate, \
     BarberUnavailableTimeUpdate
 
@@ -56,24 +57,32 @@ def delete_barber(db: Session, barber_id: int):
 def assign_services_to_barber(
         db: Session,
         barber_id: int,
-        service_ids: List[int]
+        assignments: List[ServiceAssignment]
 ):
     barber = db.query(Barber).filter(Barber.id == barber_id).first()
     if not barber:
         return None
 
-    existing_ids = {service.id for service in barber.services}
-    new_ids = set(service_ids) - existing_ids
-
+    existing_ids = {service.service_id for service in barber.barber_services}
+    print("existing_ids", existing_ids)
+    new_assignments = [a for a in assignments if a.service_id not in existing_ids]
+    new_ids = [a.service_id for a in new_assignments]
+    print("new_ids", new_ids)
     if not new_ids:
         return barber
-
+    print("success")
     new_services = db.query(Service).filter(Service.id.in_(new_ids)).all()
     if len(new_services) != len(new_ids):
         raise HTTPException(status_code=400, detail="Some service IDs were not found")
 
-    barber.services.extend(new_services)
-
+    # barber.services.extend(new_services)
+    for service in new_assignments:
+        barber_service = BarberService(
+            barber_id=barber.id,
+            service_id=service.service_id,
+            duration=service.duration
+        )
+        db.add(barber_service)
     db.commit()
     db.refresh(barber)
     return barber
@@ -114,11 +123,12 @@ def remove_service_from_barber(
     if not barber:
         return None
 
-    service = next((service for service in barber.services if service.id == service_id), None)
+    service = next((service for service in barber.barber_services if service.service_id == service_id), None)
     if not service:
         raise HTTPException(status_code=400, detail="Service not assigned to this barber")
 
-    barber.services.remove(service)
+    # barber.services.remove(service)
+    db.delete(service)
     db.commit()
     db.refresh(barber)
     return barber

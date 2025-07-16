@@ -8,22 +8,28 @@ from sqlalchemy.orm import Session
 from src.app.models.addon import Addon
 from src.app.models.appointment import Appointment
 from src.app.models.barber_schedule import BarberSchedule
+from src.app.models.barber_service_link import BarberService
 from src.app.models.barber_unavailable_time import BarberUnavailableTime
 from src.app.models.service import Service
 
 
 
-def calculate_total_duration(db: Session, service_id: int, addon_ids: list) -> timedelta:
-    # Получаем основную услугу
+def calculate_total_duration(db: Session, service_id: int,barber_id: int, addon_ids: list[int]) -> timedelta:
 
-    service = db.get(Service, service_id)
-    if not service:
+
+    barber_service = db.scalars(
+        select(BarberService)
+        .where(BarberService.barber_id == barber_id)
+        .where(BarberService.service_id == service_id)
+    ).first()
+
+    if not barber_service:
         raise ValueError("Service not found")
 
-    # Длительность основной услуги
-    service_duration = timedelta(minutes=service.duration)
 
-    # Суммируем длительность всех добавочных услуг
+    service_duration = timedelta(minutes=barber_service.duration)
+
+
     addons_duration = sum(
         (addon.duration for addon in db.scalars(
             select(Addon).where(Addon.id.in_(addon_ids))
@@ -65,7 +71,7 @@ def get_available_timeslots(
     # service_duration_minutes = service.duration
     # service_duration = timedelta(minutes=service_duration_minutes)
 
-    total_duration = calculate_total_duration(db=db, service_id=service_id, addon_ids=addon_ids)
+    total_duration = calculate_total_duration(db=db, service_id=service_id, barber_id=barber_id, addon_ids=addon_ids)
     print("total_duration", total_duration)
     # print("duration", total_duration, "service_duration_minutes", service_duration_minutes)
     working_start_datetime_utc = datetime.combine(target_date, working_start_time).replace(tzinfo=timezone.utc)
@@ -191,7 +197,7 @@ def check_availability(
         addon_ids = []
 
 
-    duration = calculate_total_duration(db, service_id, addon_ids)
+    duration = calculate_total_duration(db, service_id, barber_id, addon_ids)
 
 
     requested_start = (
