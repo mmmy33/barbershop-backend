@@ -9,7 +9,7 @@ from src.app.database import get_db
 from src.app.models.barber import Barber
 from src.app.models.service import Service
 from src.app.models.user import User
-from src.app.services.timeslot_generator import get_available_timeslots, check_availability
+from src.app.services.timeslot_generator import get_available_timeslots, check_availability_on_create
 
 router = APIRouter()
 

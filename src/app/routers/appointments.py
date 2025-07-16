@@ -15,8 +15,8 @@ from src.app.models.barber import Barber
 from src.app.models.service import Service
 from src.app.models.user import User
 from src.app.schemas.appointment import AppointmentCreate, AppointmentReadDetailed, AppointmentResponse, \
-    AppointmentGroupedUserView, AppointmentShortUserView, AddonsOut
-from src.app.services.timeslot_generator import check_availability
+    AppointmentGroupedUserView, AppointmentShortUserView, AddonsOut, AppointmentUpdate
+from src.app.services.timeslot_generator import check_availability_on_create, check_availability_on_edit
 
 router = APIRouter()
 
@@ -27,15 +27,30 @@ def create_appointment(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    check_availability(
+    check_availability_on_create(
         db=db,
         barber_id=appointment.barber_id,
         scheduled_time=appointment.scheduled_time,
-        service_id=appointment.service_id)  # check_availability
+        service_id=appointment.service_id,
+        addon_ids=appointment.addon_ids)  # check_availability
     created_appointment = create_appointment_crud(db=db, data=appointment, user_id=current_user.id)
 
     return created_appointment
 
+@router.patch("/{appointment_id}", response_model=AppointmentReadDetailed)
+def update_appointment(
+        appointment: AppointmentUpdate,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    check_availability_on_edit(
+        db=db,
+        appointment_id=appointment.appointment_id,
+        scheduled_time=appointment.scheduled_time,
+    )
+    updated_appointment = crud.appointment.update_appointment(db=db, new_appointment=appointment)
+
+    return updated_appointment
 
 @router.get("/barber/{barber_id}", response_model=List[AppointmentResponse])
 def get_appointments_by_barber(

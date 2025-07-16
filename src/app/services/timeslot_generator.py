@@ -1,5 +1,5 @@
 from datetime import datetime, date, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException
 from sqlalchemy import select, func
@@ -186,18 +186,20 @@ def get_available_timeslots(
 
 
 
-def check_availability(
+
+
+def _check_slot_availability(
     db: Session,
     barber_id: int,
-    scheduled_time: datetime,  # must be UTC
-    service_id: int,
-    addon_ids: List[int] = None
+    scheduled_time: datetime,
+    duration: timedelta,
+    appointment_id: Optional[int] = None
 ):
-    if addon_ids is None:
-        addon_ids = []
-
-
-    duration = calculate_total_duration(db, service_id, barber_id, addon_ids)
+    # if addon_ids is None:
+    #     addon_ids = []
+    #
+    #
+    # duration = duration | calculate_total_duration(db, service_id, barber_id, addon_ids)
 
 
     requested_start = (
@@ -233,6 +235,8 @@ def check_availability(
     ).all()
 
     for appt in existing_appointments:
+        if appointment_id is not None and appt.id == appointment_id:
+            continue  # skip the current appointment
         appt_start = (
             appt.scheduled_time.astimezone(timezone.utc)
             if appt.scheduled_time.tzinfo
@@ -246,3 +250,29 @@ def check_availability(
 
 
     return True
+
+
+def check_availability_on_create(
+    db: Session,
+    service_id: int,
+    barber_id: int,
+    scheduled_time: datetime,
+    addon_ids: List[int]
+):
+    duration = calculate_total_duration(db, service_id, barber_id, addon_ids)
+    return _check_slot_availability(db, barber_id, scheduled_time, duration)
+
+
+def check_availability_on_edit(
+    db: Session,
+    scheduled_time: datetime,
+    appointment_id: int
+):
+    appointment = db.get(Appointment, appointment_id)
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    barber_id = appointment.barber_id
+    duration = timedelta(minutes=appointment.total_duration)
+
+    return _check_slot_availability(db, barber_id, scheduled_time, duration, appointment_id)

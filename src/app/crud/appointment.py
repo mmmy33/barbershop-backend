@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from typing import List
 
 from fastapi import HTTPException
@@ -7,7 +8,7 @@ from src.app.models.addon import Addon
 from src.app.models.appointment import Appointment
 from src.app.models.barber import Barber
 from src.app.models.service import Service
-from src.app.schemas.appointment import AppointmentCreate
+from src.app.schemas.appointment import AppointmentCreate, AppointmentUpdate
 
 
 def create_appointment(db: Session, data: AppointmentCreate, user_id: int) -> Appointment:
@@ -80,6 +81,18 @@ def get_appointment_by_barber(db: Session, barber_id: int) -> List[Appointment]:
 
     return appointments
 
+def update_appointment(db: Session, new_appointment: AppointmentUpdate) -> Appointment:
+    appointment = db.query(Appointment).filter(Appointment.id == new_appointment.appointment_id).first()
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    appointment.scheduled_time = new_appointment.scheduled_time
+
+
+    db.commit()
+    db.refresh(appointment)
+
+    return appointment
 
 def delete_appointment(db: Session, appointment_id: int) -> bool:
     appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
@@ -89,3 +102,5 @@ def delete_appointment(db: Session, appointment_id: int) -> bool:
     db.delete(appointment)
     db.commit()
     return True
+
+

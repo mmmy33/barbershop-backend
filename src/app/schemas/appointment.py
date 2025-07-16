@@ -17,6 +17,11 @@ class AppointmentCreate(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
+class AppointmentUpdate(BaseModel):
+    appointment_id: int
+    scheduled_time: datetime
+    model_config = ConfigDict(populate_by_name=True)
+
 
 class AppointmentRead(BaseModel):
     id: int
@@ -115,3 +120,5 @@ class AppointmentShortUserView(BaseModel):
 class AppointmentGroupedUserView(BaseModel):
     upcoming: List[AppointmentShortUserView]
     completed: List[AppointmentShortUserView]
+
+
