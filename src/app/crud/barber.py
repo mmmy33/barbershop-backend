@@ -18,13 +18,13 @@ from src.app.schemas.barber_schedule import BarberScheduleCreate, BarberSchedule
 
 def create_barber(db: Session, barber: BarberCreate):
 
-    user = db.query(User).filter(User.id == barber.user_id).first()
+    user = db.query(User).filter(User.email == barber.email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
 
     user.role = "barber"
-    new_barber = Barber(**barber.model_dump(exclude="user_id"), user_id=user.id)
+    new_barber = Barber(**barber.model_dump(exclude="email"), user_id=user.id)
 
     db.add(new_barber)
     db.commit()
