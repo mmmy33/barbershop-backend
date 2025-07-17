@@ -12,7 +12,7 @@ load_dotenv()
 def mail_data():
     required_variables = ["MAIL_USERNAME_ENV", "MAIL_APP_PASSWORD_ENV"]
     my_mail = list(map(os.getenv, required_variables))
-    print(my_mail, "*" * 19)
+    # print(my_mail, "*" * 19)
     if all(my_mail):
 
         MAIL_CONF = ConnectionConfig(

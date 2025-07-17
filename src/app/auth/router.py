@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_mail import MessageSchema
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.app.auth.dependencies import get_current_user, admin_required
@@ -73,8 +74,12 @@ async def register_user(data: UserRegister, db: Session = Depends(get_db)):
         verification_code_expires=verification_code_expires
     )
 
-    db.add(new_user)
-    db.commit()
+    try:
+        db.add(new_user)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="User with this email or phone already exists")
 
 
 

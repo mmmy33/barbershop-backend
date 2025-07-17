@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from src.app import crud
-from src.app.auth.dependencies import get_current_user, admin_required
+from src.app.auth.dependencies import get_current_user, admin_required, barber_required
 from src.app.database import get_db
 from src.app.crud.appointment import create_appointment as create_appointment_crud, get_appointment_by_barber
 
@@ -126,3 +126,15 @@ def get_user_appointments(
         "upcoming": upcoming,
         "completed": completed
     }
+
+
+@router.get("/me/barber", response_model=List[AppointmentResponse])
+def get_appointments_by_barber(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(barber_required)
+):
+    try:
+        appointments_from_db = get_appointment_by_barber(db, current_user.id)
+        return appointments_from_db
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

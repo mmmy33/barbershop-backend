@@ -61,4 +61,18 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
 def admin_required(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access denied")
+
+    if not current_user.barber:
+        raise HTTPException(status_code=404, detail="Barber profile not found")
+
     return current_user
+
+
+def barber_required(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "barber":
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if current_user.barber is None:
+        raise HTTPException(status_code=404, detail="Barber profile not found")
+    print("+"*100 + "current_user.barber", current_user.barber.id)
+    return current_user.barber

@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.models.barber_addon_link import barber_addon
@@ -12,6 +13,8 @@ class Barber(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column()
     avatar_url: Mapped[str] = mapped_column(nullable=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
+    user: Mapped["User"] = relationship("User", back_populates="barber")
 
     # services = relationship("Service", secondary=barber_service, back_populates="barbers")
     barber_services: Mapped[list["BarberService"]] = relationship(back_populates="barber")

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, DateTime
 from src.app.database import Base
@@ -13,6 +15,7 @@ class User(Base):
     phone_number: Mapped[str] = mapped_column(unique=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(default="user")
+    barber: Mapped[Optional["Barber"]] = relationship("Barber", back_populates="user", uselist=False)
 
     is_verified: Mapped[bool] = mapped_column(default=False)
     verification_code: Mapped[str] = mapped_column(String(6), nullable=True)

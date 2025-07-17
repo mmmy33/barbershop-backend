@@ -10,13 +10,22 @@ from src.app.models.barber_schedule import BarberSchedule
 from src.app.models.barber_service_link import BarberService
 from src.app.models.barber_unavailable_time import BarberUnavailableTime
 from src.app.models.service import Service
+from src.app.models.user import User
 from src.app.schemas.barber import BarberCreate, BarberBase, BarberUpdate, ServiceAssignment
 from src.app.schemas.barber_schedule import BarberScheduleCreate, BarberScheduleUpdate, BarberUnavailableTimeCreate, \
     BarberUnavailableTimeUpdate
 
 
 def create_barber(db: Session, barber: BarberCreate):
-    new_barber = Barber(**barber.model_dump())
+
+    user = db.query(User).filter(User.id == barber.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+    user.role = "barber"
+    new_barber = Barber(**barber.model_dump(exclude="user_id"), user_id=user.id)
+
     db.add(new_barber)
     db.commit()
     db.refresh(new_barber)

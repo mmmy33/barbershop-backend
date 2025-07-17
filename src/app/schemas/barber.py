@@ -9,6 +9,7 @@ class BarberBase(BaseModel):
 
 
 class BarberCreate(BarberBase):
+    user_id: int
     pass
 
 
