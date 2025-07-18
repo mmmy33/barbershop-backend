@@ -1,18 +1,56 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
+from src.app.models.service import Service
 from src.app.schemas.barber import BarberRead
 
 
-class ServiceBase(BaseModel):
+
+
+class ServiceCreate(BaseModel):
     name: str
-    duration: int
     price: int
 
+class ServiceBase(BaseModel):
+    duration: int
 
-class ServiceCreate(ServiceBase):
-    pass
+
+class BarberDurationInfo(BaseModel):
+    id: int
+    name: str
+    duration: int
+
+
+class ServiceWithBarbersResponse(BaseModel):
+    id: int
+    name: str
+    price: int
+    barbers: List[BarberDurationInfo] = []
+
+    class Config:
+        from_attributes = True
+
+    @model_validator(mode="before")
+    @classmethod
+    def prepare_data(cls, data):
+        if isinstance(data, Service):  # Якщо це SQLAlchemy модель
+            return {
+                "id": data.id,
+                "name": data.name,
+                "price": data.price,
+                "barbers": [
+                    {
+                        "id": bs.barber.id,
+                        "name": bs.barber.name,
+                        "duration": bs.duration
+                    }
+                    for bs in data.barber_services
+                ]
+            }
+        return data
+
+
 
 
 class ServiceRead(ServiceBase):
@@ -24,7 +62,7 @@ class ServiceRead(ServiceBase):
 
 class ServiceUpdate(BaseModel):
     name: Optional[str] = None
-    duration: Optional[int] = None
+
     price: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)

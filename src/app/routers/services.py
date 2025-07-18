@@ -5,13 +5,13 @@ from src.app.auth.dependencies import admin_required, get_current_user
 from src.app.database import get_db
 from src.app.crud import service as crud
 from src.app.models.user import User
-from src.app.schemas.service import ServiceCreate, ServiceRead, ServiceBase, ServiceUpdate
+from src.app.schemas.service import ServiceCreate, ServiceRead, ServiceBase, ServiceUpdate, ServiceWithBarbersResponse
 from typing import List
 
 router = APIRouter(tags=["Services"])
 
 
-@router.post("/", response_model=ServiceRead)
+@router.post("/", response_model=ServiceWithBarbersResponse)
 def create_service(
         service: ServiceCreate,
         db: Session = Depends(get_db),
@@ -20,12 +20,14 @@ def create_service(
     return crud.create_service(db=db, service=service)
 
 
-@router.get("/", response_model=List[ServiceRead])
+@router.get("/", response_model=List[ServiceWithBarbersResponse])
 def get_all_services(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = crud.get_services(db=db)
+
     return crud.get_services(db=db)
 
 
-@router.put("/{service_id}", response_model=ServiceRead)
+@router.put("/{service_id}", response_model=ServiceWithBarbersResponse)
 def update_service(
         service_id: int,
         updated_data: ServiceUpdate,
