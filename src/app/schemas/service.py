@@ -22,7 +22,7 @@ class BarberDurationInfo(BaseModel):
     duration: int
 
 class BarberServiceResponse(BaseModel):
-    barber_id: int
+    service_id: int
     duration: int
 
 class ServiceWithBarbersResponse(BaseModel):
