@@ -21,6 +21,9 @@ class BarberDurationInfo(BaseModel):
     name: str
     duration: int
 
+class BarberServiceResponse(BaseModel):
+    barber_id: int
+    duration: int
 
 class ServiceWithBarbersResponse(BaseModel):
     id: int

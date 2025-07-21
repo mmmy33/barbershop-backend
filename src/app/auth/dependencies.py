@@ -54,8 +54,8 @@ def get_current_user(
     return user
 
 
-def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
-    return current_user
+# def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+#     return current_user
 
 
 def admin_required(current_user: User = Depends(get_current_user)) -> User:
@@ -73,5 +73,6 @@ def barber_required(current_user: User = Depends(get_current_user)) -> User:
 
     if current_user.barber is None:
         raise HTTPException(status_code=404, detail="Barber profile not found")
-    print("+"*100 + "current_user.barber", current_user.barber.id)
+
     return current_user.barber
+

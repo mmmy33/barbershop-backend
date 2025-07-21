@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.app.auth.dependencies import admin_required, get_current_user
+from src.app.auth.dependencies import admin_required, get_current_user, barber_required
 from src.app.crud.barber import create_barber_schedule, get_barber_schedules, get_barber_schedule_by_id, \
     update_barber_schedule, delete_barber_schedule, create_barber_unavailable_time, get_barber_unavailable_times, \
     get_barber_unavailable_time_by_id, update_barber_unavailable_time, delete_barber_unavailable_time
+from src.app.crud.service import get_services_by_barber
 from src.app.database import get_db
 from src.app.crud import barber as crud
 from src.app.models.barber import Barber
@@ -14,6 +15,7 @@ from typing import List
 
 from src.app.schemas.barber_schedule import BarberScheduleInDB, BarberScheduleCreate, BarberScheduleUpdate, \
     BarberUnavailableTimeCreate, BarberUnavailableTimeInDB, BarberUnavailableTimeUpdate
+from src.app.schemas.service import BarberDurationInfo, BarberServiceResponse
 
 router = APIRouter(tags=["Barbers"])
 
@@ -82,6 +84,15 @@ def assign_addons(
     if not result:
         raise HTTPException(status_code=404, detail="Barber not found or invalid addon IDs")
     return result
+
+@router.get("/{barber_id}/services", response_model=List[BarberServiceResponse])
+def get_my_services(
+    barber_id: int,
+    barber: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    return get_services_by_barber(db, barber_id)
 
 
 @router.delete("/{barber_id}/service/{service_id}", response_model=BarberRead)
