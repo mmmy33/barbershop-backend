@@ -7,7 +7,8 @@ from src.app.auth.dependencies import get_current_user, admin_required
 from src.app.database import get_db
 from src.app.auth.schemas import UserLogin, UserRegister, Token, UserUpdate
 from src.app.models.user import User
-from src.app.auth.security import hash_password, verify_password, create_access_token
+from src.app.auth.security import hash_password, verify_password, create_access_token, create_password_reset_token, \
+    verify_password_reset_token
 import logging
 from datetime import datetime, timedelta
 import secrets
@@ -35,7 +36,7 @@ async def register_user(data: UserRegister, db: Session = Depends(get_db)):
         recipients=[data.email],
         body=f"""
                     <h1>Код підтвердження</h1>
-                    <p>Ваш код: <strong>{verification_code}</strong></p>
+                    <p>Ваш Userкод: <strong>{verification_code}</strong></p>
                     <p>Дійсний до: {verification_code_expires}</p>
                 """,
         # subtype=MessageType.html
@@ -137,6 +138,86 @@ def login_user(data: UserLogin, db: Session = Depends(get_db)):
         "access_token": token,
         "token_type": "bearer"
     }
+
+
+
+
+
+
+
+@router.post("/password-reset/request")
+async def request_password_reset(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"message": "If the email exists, a reset link has been sent"}
+
+
+    token, jti, expires = create_password_reset_token(user.id)
+
+    user.password_reset_jti = hash_password(jti)
+    user.password_reset_expires = expires
+    db.commit()
+
+
+    reset_link = f"https://ваш-фронтенд/reset-password?token={token}"
+
+    message = MessageSchema(
+        subject="Password Reset Request",
+        recipients=[email],
+        body=f"""
+                <h1>Password Reset</h1>
+                <p>Click the link to reset your password:</p>
+                <a href="{reset_link}">Reset Password</a>
+                <p>Link expires in 1 hour.</p>
+            """,
+        subtype="html"
+    )
+
+
+    async with AsyncEmailSender(message):
+        pass
+
+    return {"message": "If the email exists, a reset link has been sent"}
+
+
+@router.post("/password-reset/confirm")
+async def confirm_password_reset(
+        token: str,
+        new_password: str,
+        db: Session = Depends(get_db)
+):
+    user = verify_password_reset_token(token, db)
+
+
+    user.hashed_password = hash_password(new_password)
+    user.password_reset_jti = None
+    user.password_reset_expires = None
+    db.commit()
+
+    return {"message": "Password has been reset successfully"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @router.get("/me")

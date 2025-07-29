@@ -37,7 +37,7 @@ Create a `.env` file in the root:
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/barbershop
 SECRET_KEY=your_secret_key_here
-MAIL_USERNAME=your_email@gmail.com
+MAIL_USERNAME_ENV=your_email@gmail.com
 MAIL_APP_PASSWORD=your_secure_password_here
 ```
 

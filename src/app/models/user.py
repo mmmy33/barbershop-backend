@@ -21,4 +21,9 @@ class User(Base):
     verification_code: Mapped[str] = mapped_column(String(6), nullable=True)
     verification_code_expires: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
+    password_reset_jti: Mapped[str] = mapped_column(String(255), nullable=True)
+    password_reset_expires: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+
     appointments: Mapped[list["Appointment"]] = relationship("Appointment", back_populates="user")
+
+
