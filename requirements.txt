@@ -17,9 +17,9 @@ fastapi-cli==0.0.7
 fastapi-mail==1.5.0
 greenlet==3.2.2
 h11==0.12.0
-httpcore==1.0.2
+httpcore
 httptools==0.6.4
-httpx==0.27.0
+httpx==
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
