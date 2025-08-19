@@ -90,8 +90,8 @@ class BarberUnavailableTimeBase(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "start_datetime": "2025-06-15T10:00:00+03:00",
-                    "end_datetime": "2025-06-15T12:00:00+03:00",
+                    "start_time": "2025-06-15T10:00:00+03:00",
+                    "end_time": "2025-06-15T12:00:00+03:00",
                     "reason": "Lunch break"
                 }
             ]

@@ -7,3 +7,48 @@ __pycache__/
 # Venv
 venv/
 .env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/__init__.py
+
+# Docker
+.dockerignore
+
+# Local configuration
+config.local.py
+settings.local.py

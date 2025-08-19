@@ -10,7 +10,7 @@ from src.app.models.user import User
 from src.app.auth.security import hash_password, verify_password, create_access_token, create_password_reset_token, \
     verify_password_reset_token
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 
 from src.app.services.email_service import AsyncEmailSender
@@ -29,7 +29,7 @@ async def register_user(data: UserRegister, db: Session = Depends(get_db)):
     existing = db.query(User).filter_by(email=data.email).first()
 
     verification_code = str(secrets.randbelow(900000) + 100000)
-    verification_code_expires = datetime.utcnow() + timedelta(minutes=15)
+    verification_code_expires = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=15)
 
     message = MessageSchema(
         subject="Registration was successful",
@@ -48,7 +48,7 @@ async def register_user(data: UserRegister, db: Session = Depends(get_db)):
         if existing.is_verified:
             raise HTTPException(status_code=400, detail="User already exists")
 
-        if existing.verification_code_expires and existing.verification_code_expires > datetime.utcnow():
+        if existing.verification_code_expires and existing.verification_code_expires > datetime.now(timezone.utc).replace(tzinfo=None):
             raise HTTPException(
                 status_code=400,
                 detail="Verification code already sent. Check your email."
@@ -99,7 +99,7 @@ async def verify_email(
     user = db.query(User).filter(
         User.email == email,
         User.verification_code == code,
-        User.verification_code_expires > datetime.utcnow()  # Код ще дійсний
+        User.verification_code_expires > datetime.now(timezone.utc).replace(tzinfo=None)  # Код ще дійсний
     ).first()
 
     if not user:

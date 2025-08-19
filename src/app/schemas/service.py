@@ -31,8 +31,7 @@ class ServiceWithBarbersResponse(BaseModel):
     price: int
     barbers: List[BarberDurationInfo] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="before")
     @classmethod

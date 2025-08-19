@@ -25,7 +25,9 @@ def get_addons(db: Session):
 def update_addon(db: Session, addon_id: int, updated_data: AddonUpdate):
     addon = get_addon(db, addon_id)
     if addon:
-        for key, value in updated_data.model_dump().items():
+        # Only update fields that are provided (not None)
+        update_dict = updated_data.model_dump(exclude_unset=True)
+        for key, value in update_dict.items():
             setattr(addon, key, value)
         db.commit()
         db.refresh(addon)

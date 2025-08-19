@@ -32,8 +32,9 @@ def get_service(db: Session, service_id: int):
 def update_service(db: Session, service_id: int, updated_data: ServiceUpdate):
     service = get_service(db, service_id)
     if service:
-        for key, value in updated_data.model_dump().items():
-            setattr(service, key, value)
+        for key, value in updated_data.model_dump(exclude_unset=True).items():
+            if value is not None:  # Only update if value is not None
+                setattr(service, key, value)
         db.commit()
         db.refresh(service)
     return service
@@ -42,6 +43,12 @@ def update_service(db: Session, service_id: int, updated_data: ServiceUpdate):
 def delete_service(db: Session, service_id: int):
     service = get_service(db, service_id)
     if service:
+        # First delete related barber-service links
+        barber_services = db.query(BarberService).filter(BarberService.service_id == service_id).all()
+        for barber_service in barber_services:
+            db.delete(barber_service)
+        
+        # Then delete the service
         db.delete(service)
         db.commit()
         return True

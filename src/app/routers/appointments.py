@@ -102,10 +102,12 @@ def get_user_appointments(
 
     def to_short_view(a: Appointment) -> AppointmentShortUserView:
         start = a.scheduled_time or datetime.now(UTC)
+        
+        # Ensure start is timezone-aware
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=timezone.utc)
 
         end = start + timedelta(minutes=a.total_duration)
-
-        a.scheduled_time = a.scheduled_time.replace(tzinfo=timezone.utc)
 
         full_service_title = " + ".join([a.service.name] + [addon.name for addon in a.addons])
 
@@ -119,8 +121,19 @@ def get_user_appointments(
             total_price=a.total_price
         )
 
-    upcoming = [to_short_view(a) for a in appointments if a.scheduled_time > now]
-    completed = [to_short_view(a) for a in appointments if a.scheduled_time <= now]
+    # Ensure all scheduled times are timezone-aware for comparison
+    upcoming = []
+    completed = []
+    
+    for a in appointments:
+        scheduled_time = a.scheduled_time
+        if scheduled_time.tzinfo is None:
+            scheduled_time = scheduled_time.replace(tzinfo=timezone.utc)
+        
+        if scheduled_time > now:
+            upcoming.append(to_short_view(a))
+        else:
+            completed.append(to_short_view(a))
 
     return {
         "upcoming": upcoming,

@@ -126,3 +126,146 @@ VITE_API_URL=http://127.0.0.1:8000/api
 
 Interactive docs available at:  
 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+## 🧪 Testing
+
+This project includes comprehensive test coverage for all endpoints and functionality.
+
+### Test Structure
+
+The tests are organized in the `tests/` directory and cover:
+
+- **Authentication** (`test_auth.py`) - User registration, login, email verification, password reset
+- **Appointments** (`test_appointments.py`) - Appointment creation, management, and validation
+- **Barbers** (`test_barbers.py`) - Barber CRUD operations and management
+- **Services** (`test_services.py`) - Service management and validation
+- **Addons** (`test_addons.py`) - Addon management and pricing
+- **Barber Schedules** (`test_barber_schedules.py`) - Schedule management and availability
+- **Timeslots** (`test_timeslots.py`) - Available time slot generation and validation
+- **Integration Workflows** (`test_integration_workflows.py`) - End-to-end user workflows
+- **Database** (`test_database.py`) - Database connection and session management
+
+### Running Tests
+
+#### Prerequisites
+Make sure you have the test dependencies installed:
+```bash
+pip install -r requirements.txt
+```
+
+#### Quick Test Commands
+
+**Run all tests:**
+```bash
+pytest tests/ -v
+```
+
+**Run with coverage report:**
+```bash
+pytest tests/ --cov=src --cov-report=html --cov-report=term-missing
+```
+
+**Run specific test categories:**
+```bash
+# Authentication tests only
+pytest tests/test_auth.py -v
+
+# Appointments tests only
+pytest tests/test_appointments.py -v
+
+# Barbers tests only
+pytest tests/test_barbers.py -v
+
+# Services tests only
+pytest tests/test_services.py -v
+```
+
+**Run tests by markers:**
+```bash
+# Run only unit tests
+pytest tests/ -m "unit" -v
+
+# Run only integration tests
+pytest tests/ -m "integration" -v
+
+# Skip slow tests
+pytest tests/ -m "not slow" -v
+```
+
+#### Using the Test Runner Script
+
+For convenience, you can use the provided test runner script:
+
+```bash
+# Run all tests
+python run_tests.py
+
+# Run authentication tests only
+python run_tests.py --type auth
+
+# Run with coverage report
+python run_tests.py --coverage
+
+# Run with HTML coverage report
+python run_tests.py --html
+
+# Run specific test categories
+python run_tests.py --type register
+python run_tests.py --type login
+python run_tests.py --type admin
+```
+
+### Test Configuration
+
+The project uses `pytest` with the following configuration (`pytest.ini`):
+- Test discovery in `tests/` directory
+- Coverage reporting for `src/` directory
+- HTML coverage reports
+- Custom markers for test categorization
+- Verbose output by default
+
+### Test Database
+
+Tests use SQLite in-memory database for:
+- Fast execution
+- Complete isolation between tests
+- No external database dependencies
+- Automatic cleanup after each test
+
+### Coverage Report
+
+After running tests with coverage, view the HTML report:
+```bash
+pytest tests/ --cov=src --cov-report=html
+# Open htmlcov/index.html in your browser
+```
+
+### Test Categories
+
+#### Unit Tests
+- Individual function and endpoint testing
+- Mocked dependencies
+- Fast execution
+- Focused on specific functionality
+
+#### Integration Tests
+- End-to-end workflow testing
+- Real database interactions
+- Complete user scenarios
+- Cross-module functionality
+
+#### Security Tests
+- JWT token validation
+- Authentication and authorization
+- Input validation and sanitization
+- SQL injection prevention
+
+### Continuous Integration
+
+The test suite is designed for CI/CD pipelines:
+- No external dependencies
+- Deterministic results
+- Comprehensive coverage
+- Clear pass/fail reporting
+
+For detailed test documentation, see [tests/README.md](tests/README.md).
